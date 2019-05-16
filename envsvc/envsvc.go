@@ -13,15 +13,20 @@ import (
 	"code.sajari.com/env"
 )
 
-// Parse registers command line arguments -env-check, -env-dump, -env-dump-yaml
-// and calls env.Parse().  Any errors are written to stderr and then os.Exit(1) is called.
+// Parse is equivalent to ParseWithExitFn(os.Exit).
+func Parse() {
+	ParseWithExitFn(os.Exit)
+}
+
+// ParseWithExitFn registers command line arguments -env-check, -env-dump, -env-dump-yaml
+// and calls env.Parse().  Any errors are written to stderr and then exitFn(1) is called.
 //
 // Registered flags:
-// -env-dump: skips parsing step and writes each env.Var to stderr, calls os.Exit(0) when done.
+// -env-dump: skips parsing step and writes each env.Var to stderr, calls exitFn(0) when done.
 // -env-dump-yaml: skips parsing steps and write each env.Var to stderr in YAML format, calls
 // os.Exit(0) when done.
-// -env-check: calls os.Exit(0) if env.Parse() succeeds without error.
-func Parse() {
+// -env-check: calls exitFn(0) if env.Parse() succeeds without error.
+func ParseWithExitFn(exitFn func(int)) {
 	envCheck := flag.Bool("env-check", false, "check env variables")
 	envDump := flag.Bool("env-dump", false, "dump env variables")
 	envDumpYAML := flag.Bool("env-dump-yaml", false, "dump env variables in YAML format")
@@ -42,14 +47,14 @@ func Parse() {
 			fmt.Fprintf(outWriter, "    %q: %q", v.Name, os.Getenv(v.Name))
 		})
 		fmt.Fprintf(outWriter, "\n}\n")
-		os.Exit(0)
+		exitFn(0)
 	}
 
 	if *envDumpYAML {
 		env.Visit(func(v *env.Var) {
 			fmt.Fprintf(outWriter, "- name: %v\n  value: %q\n", v.Name, os.Getenv(v.Name))
 		})
-		os.Exit(0)
+		exitFn(0)
 	}
 
 	if *envDump {
@@ -61,7 +66,7 @@ func Parse() {
 			first = false
 			fmt.Fprintf(outWriter, "# %v\nexport %v=%q\n", v.Usage, v.Name, os.Getenv(v.Name))
 		})
-		os.Exit(0)
+		exitFn(0)
 	}
 
 	if err := env.Parse(); err != nil {
@@ -72,10 +77,10 @@ func Parse() {
 		} else {
 			fmt.Fprintln(outWriter, err)
 		}
-		os.Exit(1)
+		exitFn(1)
 	}
 
 	if *envCheck {
-		os.Exit(0)
+		exitFn(0)
 	}
 }
