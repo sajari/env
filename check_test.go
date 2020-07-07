@@ -157,6 +157,42 @@ func TestIsDialAddr(t *testing.T) {
 	}
 }
 
+func TestURL(t *testing.T) {
+	tests := []struct {
+		in      string
+		wantErr bool
+	}{
+		// Valid
+		{"http://localhost", false},
+		{"http://localhost:1234", false},
+		{"http://192.168.0.1:1234", false},
+		{"https://example.com", false},
+		{"https://example.com/home", false},
+		{"https://example.com/home?a=b", false},
+
+		// Invalid
+		{"", true},
+		{"ht tp://foo.com", true}, // invalid character in schema
+		{"http://a b.com/", true}, // no space in host name please
+		{"cache_object:foo", true},
+	}
+
+	env.ResetForTesting()
+	prefix := env.CmdVar.Name()
+	_ = env.URL("URL", "URL test")
+	name := strings.ToUpper(prefix) + "_URL"
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			os.Setenv(name, tt.in)
+
+			if err := env.Parse(); (err != nil) != tt.wantErr {
+				t.Errorf("env.Parse() = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestIsPath(t *testing.T) {
 	env.ResetForTesting()
 

@@ -5,6 +5,7 @@ package env // import "code.sajari.com/env"
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -128,6 +129,30 @@ func (v *boolValue) String() string {
 	return strconv.FormatBool(bool(*v))
 }
 
+type urlValue url.URL
+
+func newURLValue(x url.URL, p *url.URL) *urlValue {
+	*p = x
+	return (*urlValue)(p)
+}
+
+func (v *urlValue) Set(x string) error {
+	if x == "" {
+		return errors.New("empty")
+	}
+	u, err := url.Parse(x)
+	if err != nil {
+		return err
+	}
+	*v = urlValue(*u)
+	return err
+}
+
+func (v *urlValue) String() string {
+	u := url.URL(*v)
+	return u.String()
+}
+
 // NewVarSet creates a new variable set with given name.
 //
 // If name is non-empty, then all variables will have a strings.ToUpper(name)+"_"
@@ -249,6 +274,14 @@ func (v *VarSet) DialAddr(name, usage string) *string {
 	return p
 }
 
+// URL defines a string variable with specified name, usage string validated as a URL.
+// The return value is the address of a URL variable that stores the value of the variable.
+func (v *VarSet) URL(name, usage string) *url.URL {
+	p := new(url.URL)
+	v.Var(newURLValue(url.URL{}, p), name, usage)
+	return p
+}
+
 // Path defines a string variable with specified name, usage string validated as a local path.
 // The return value is the address of a string variable that stores the value of the variable.
 func (v *VarSet) Path(name, usage string) *string {
@@ -354,6 +387,12 @@ func BindAddr(name, usage string) *string {
 // The return value is the address of a string variable that stores the value of the variable.
 func DialAddr(name, usage string) *string {
 	return CmdVar.DialAddr(name, usage)
+}
+
+// URL defines a string variable with specified name, usage string validated as a URL.
+// The return value is the address of a URL variable that stores the value of the variable.
+func URL(name, usage string) *url.URL {
+	return CmdVar.URL(name, usage)
 }
 
 // Path defines a string variable with specified name, usage string validated as a
