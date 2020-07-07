@@ -20,6 +20,7 @@ func TestAll(t *testing.T) {
 	env.Int("INT", "int test")
 	env.BindAddr("LISTEN", "bindaddr test")
 	env.DialAddr("ADDR", "dialaddr test")
+	env.URL("URL", "URL test")
 	env.String("STRING", "string test")
 	env.Duration("TIMEOUT", "timeout test")
 
@@ -28,6 +29,7 @@ func TestAll(t *testing.T) {
 		"TEST_INT":     "1",
 		"TEST_LISTEN":  ":1234",
 		"TEST_ADDR":    "localhost:1234",
+		"TEST_URL":     "http://localhost:1234/api",
 		"TEST_STRING":  "name",
 		"TEST_TIMEOUT": "1m1s",
 	}
