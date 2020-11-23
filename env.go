@@ -67,6 +67,28 @@ func (v *intValue) String() string {
 	return strconv.Itoa(int(*v))
 }
 
+type int64Value int64
+
+func newInt64Value(x int64, p *int64) *int64Value {
+	*p = x
+	return (*int64Value)(p)
+}
+
+func (v *int64Value) Set(x string) error {
+	n, err := strconv.ParseInt(x, 10, 64)
+	*v = int64Value(n)
+	if err != nil {
+		if ne, ok := err.(*strconv.NumError); ok {
+			return errors.New("parsing " + strconv.Quote(ne.Num) + ": " + ne.Err.Error())
+		}
+	}
+	return err
+}
+
+func (v *int64Value) String() string {
+	return strconv.FormatInt(int64(*v), 10)
+}
+
 type durationValue time.Duration
 
 func newDurationValue(x time.Duration, p *time.Duration) *durationValue {
@@ -176,6 +198,14 @@ func (v *VarSet) StringRequired(name string, usage string) *string {
 func (v *VarSet) Int(name string, usage string) *int {
 	p := new(int)
 	v.Var(newIntValue(0, p), name, usage)
+	return p
+}
+
+// Int64 defines an int64 variable with specified name, usage string and validation checks.
+// The return value is the address of an int variable that stores the value of the variable.
+func (v *VarSet) Int64(name string, usage string) *int64 {
+	p := new(int64)
+	v.Var(newInt64Value(0, p), name, usage)
 	return p
 }
 
@@ -337,6 +367,12 @@ func Path(name, usage string) *string {
 // The return value is the address of an int variable that stores the value of the variable.
 func Int(name string, usage string) *int {
 	return CmdVar.Int(name, usage)
+}
+
+// Int64 defines an int64 variable with specified name and usage string.
+// The return value is the address of an int variable that stores the value of the variable.
+func Int64(name string, usage string) *int64 {
+	return CmdVar.Int64(name, usage)
 }
 
 // Bool defines a bool variable with specified name and usage string.
