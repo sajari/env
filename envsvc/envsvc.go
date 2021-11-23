@@ -31,6 +31,7 @@ func ParseWithExitFn(exitFn func(int)) {
 	envDump := flag.Bool("env-dump", false, "dump env variables")
 	envDumpYAML := flag.Bool("env-dump-yaml", false, "dump env variables in YAML format")
 	envDumpJSON := flag.Bool("env-dump-json", false, "dump env variables in JSON format")
+	envDumpCUE := flag.Bool("env-dump-cue", false, "dump env variables as CUE schema")
 
 	flag.Parse()
 
@@ -54,6 +55,17 @@ func ParseWithExitFn(exitFn func(int)) {
 		env.Visit(func(v *env.Var) {
 			fmt.Fprintf(outWriter, "- name: %v\n  value: %q\n", v.Name, os.Getenv(v.Name))
 		})
+		exitFn(0)
+	}
+
+	if *envDumpCUE {
+		fmt.Fprintf(outWriter, "package %s\n\n", env.CmdName())
+		fmt.Fprintf(outWriter, "#Env: [string]: string")
+		env.Visit(func(v *env.Var) {
+			// Insert newlines between fields to avoid cue fmt issues
+			fmt.Fprintf(outWriter, "\n\n#Env: \"%v\": string", v.Name)
+		})
+		fmt.Fprintln(outWriter, "")
 		exitFn(0)
 	}
 
