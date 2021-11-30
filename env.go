@@ -58,7 +58,7 @@ func (v *intValue) Set(x string) error {
 	*v = intValue(n)
 	if err != nil {
 		if ne, ok := err.(*strconv.NumError); ok {
-			return errors.New("parsing " + strconv.Quote(ne.Num) + ": " + ne.Err.Error())
+			return errors.New("invalid integer " + strconv.Quote(ne.Num) + ": " + ne.Err.Error())
 		}
 	}
 	return err
@@ -80,7 +80,7 @@ func (v *int64Value) Set(x string) error {
 	*v = int64Value(n)
 	if err != nil {
 		if ne, ok := err.(*strconv.NumError); ok {
-			return errors.New("parsing " + strconv.Quote(ne.Num) + ": " + ne.Err.Error())
+			return errors.New("invalid 64-bit integer " + strconv.Quote(ne.Num) + ": " + ne.Err.Error())
 		}
 	}
 	return err
@@ -119,7 +119,7 @@ func (v *boolValue) Set(x string) error {
 	*v = boolValue(b)
 	if err != nil {
 		if ne, ok := err.(*strconv.NumError); ok {
-			return errors.New("parsing " + strconv.Quote(ne.Num) + ": " + ne.Err.Error())
+			return errors.New("invalid bool " + strconv.Quote(ne.Num) + ": " + ne.Err.Error())
 		}
 	}
 	return err
