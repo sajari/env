@@ -23,6 +23,8 @@ func TestAll(t *testing.T) {
 	env.URL("URL", "URL test")
 	env.String("STRING", "string test")
 	env.Duration("TIMEOUT", "timeout test")
+	env.Float32("FLOAT32", "float32 test")
+	env.Float64("FLOAT64", "float64 test")
 
 	tg := testGetter{
 		"TEST_BOOL":    "true",
@@ -32,6 +34,8 @@ func TestAll(t *testing.T) {
 		"TEST_URL":     "http://localhost:1234/api",
 		"TEST_STRING":  "name",
 		"TEST_TIMEOUT": "1m1s",
+		"TEST_FLOAT32": "1.23",
+		"TEST_FLOAT64": "1.24",
 	}
 
 	if err := env.CmdVar.Parse(tg); err != nil {
