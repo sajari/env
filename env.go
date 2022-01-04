@@ -90,6 +90,50 @@ func (v *int64Value) String() string {
 	return strconv.FormatInt(int64(*v), 10)
 }
 
+type float32Value float32
+
+func newFloat32Value(x float32, p *float32) *float32Value {
+	*p = x
+	return (*float32Value)(p)
+}
+
+func (v *float32Value) Set(x string) error {
+	n, err := strconv.ParseFloat(x, 32)
+	*v = float32Value(n)
+	if err != nil {
+		if ne, ok := err.(*strconv.NumError); ok {
+			return errors.New("invalid 32-bit float " + strconv.Quote(ne.Num) + ": " + ne.Err.Error())
+		}
+	}
+	return err
+}
+
+func (v *float32Value) String() string {
+	return strconv.FormatFloat(float64(*v), 'g', -1, 32)
+}
+
+type float64Value float64
+
+func newFloat64Value(x float64, p *float64) *float64Value {
+	*p = x
+	return (*float64Value)(p)
+}
+
+func (v *float64Value) Set(x string) error {
+	n, err := strconv.ParseFloat(x, 64)
+	*v = float64Value(n)
+	if err != nil {
+		if ne, ok := err.(*strconv.NumError); ok {
+			return errors.New("invalid 64-bit float " + strconv.Quote(ne.Num) + ": " + ne.Err.Error())
+		}
+	}
+	return err
+}
+
+func (v *float64Value) String() string {
+	return strconv.FormatFloat(float64(*v), 'g', -1, 64)
+}
+
 type durationValue time.Duration
 
 func newDurationValue(x time.Duration, p *time.Duration) *durationValue {
@@ -231,6 +275,22 @@ func (v *VarSet) Int(name string, usage string) *int {
 func (v *VarSet) Int64(name string, usage string) *int64 {
 	p := new(int64)
 	v.Var(newInt64Value(0, p), name, usage)
+	return p
+}
+
+// Float32 defines an float32 variable with specified name, usage string and validation checks.
+// The return value is the address of an float32 variable that stores the value of the variable.
+func (v *VarSet) Float32(name string, usage string) *float32 {
+	p := new(float32)
+	v.Var(newFloat32Value(0, p), name, usage)
+	return p
+}
+
+// Float64 defines an float64 variable with specified name, usage string and validation checks.
+// The return value is the address of an float64 variable that stores the value of the variable.
+func (v *VarSet) Float64(name string, usage string) *float64 {
+	p := new(float64)
+	v.Var(newFloat64Value(0, p), name, usage)
 	return p
 }
 
@@ -412,6 +472,18 @@ func Int(name string, usage string) *int {
 // The return value is the address of an int variable that stores the value of the variable.
 func Int64(name string, usage string) *int64 {
 	return CmdVar.Int64(name, usage)
+}
+
+// Float32 defines an float32 variable with specified name and usage string.
+// The return value is the address of an int variable that stores the value of the variable.
+func Float32(name string, usage string) *float32 {
+	return CmdVar.Float32(name, usage)
+}
+
+// Float64 defines an float64 variable with specified name and usage string.
+// The return value is the address of an int variable that stores the value of the variable.
+func Float64(name string, usage string) *float64 {
+	return CmdVar.Float64(name, usage)
 }
 
 // Bool defines a bool variable with specified name and usage string.
