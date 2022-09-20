@@ -505,5 +505,10 @@ func Visit(fn func(*Var)) {
 
 // Parse parses variables from the process environment.
 func Parse() error {
-	return CmdVar.Parse(osLookup{})
+	return ParseWithGetter(osLookup{})
+}
+
+// ParseWithGetter parses variables via the given Getter.
+func ParseWithGetter(g Getter) error {
+	return CmdVar.Parse(g)
 }

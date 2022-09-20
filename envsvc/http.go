@@ -55,7 +55,3 @@ func detailHandler(w io.Writer) {
 	})
 	fmt.Fprintf(w, "\n    ]\n}\n")
 }
-
-func init() {
-	http.HandleFunc("/debug/env", envHandler)
-}
