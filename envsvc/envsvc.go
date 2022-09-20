@@ -33,7 +33,23 @@ func ParseWithExitFn(exitFn func(int)) {
 	envDumpJSON := flag.Bool("env-dump-json", false, "dump env variables in JSON format")
 	envDumpCUE := flag.Bool("env-dump-cue", false, "dump env variables as CUE schema")
 
+	envPodYAML := flag.String("env-pod-spec", "", "path to pod YAML to read env from")
+	envPodYAMLContainerName := flag.String("env-pod-spec-container-name", "", "extract env from container `name` in the pod spec (required if more than one container is in the pod)")
+
 	flag.Parse()
+
+	var g Getter = osLookup{}
+
+	if *envPodYAML != "" {
+		f, err := os.Open(*envPodYAML)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "could not open pod spec %q: %v", *envPodYAML, err)
+		}
+		g, err = PodENVLookup(f, *envPodYAMLContainerName)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "could not read pod spec: %v", err)
+		}
+	}
 
 	var outWriter io.Writer = os.Stderr
 
@@ -45,7 +61,7 @@ func ParseWithExitFn(exitFn func(int)) {
 				fmt.Fprintf(outWriter, ",\n")
 			}
 			first = false
-			fmt.Fprintf(outWriter, "    %q: %q", v.Name, os.Getenv(v.Name))
+			fmt.Fprintf(outWriter, "    %q: %q", v.Name, get(g, v.Name))
 		})
 		fmt.Fprintf(outWriter, "\n}\n")
 		exitFn(0)
@@ -53,7 +69,7 @@ func ParseWithExitFn(exitFn func(int)) {
 
 	if *envDumpYAML {
 		env.Visit(func(v *env.Var) {
-			fmt.Fprintf(outWriter, "- name: %v\n  value: %q\n", v.Name, os.Getenv(v.Name))
+			fmt.Fprintf(outWriter, "- name: %v\n  value: %q\n", v.Name, get(g, v.Name))
 		})
 		exitFn(0)
 	}
@@ -76,7 +92,7 @@ func ParseWithExitFn(exitFn func(int)) {
 				fmt.Fprintf(outWriter, "\n")
 			}
 			first = false
-			fmt.Fprintf(outWriter, "# %v\nexport %v=%q\n", v.Usage, v.Name, os.Getenv(v.Name))
+			fmt.Fprintf(outWriter, "# %v\nexport %v=%q\n", v.Usage, v.Name, get(g, v.Name))
 		})
 		exitFn(0)
 	}
