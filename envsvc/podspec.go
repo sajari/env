@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Pod struct {
+type pod struct {
 	Spec struct {
 		Containers []struct {
 			Name string `yaml:"name"`
@@ -29,7 +29,7 @@ type Getter interface {
 // Set name if there is more than one container in the pod.
 func PodENVLookup(r io.Reader, name string) (Getter, error) {
 	dec := yaml.NewDecoder(r)
-	p := &Pod{}
+	p := &pod{}
 	if err := dec.Decode(p); err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func PodENVLookup(r io.Reader, name string) (Getter, error) {
 	return nil, fmt.Errorf("no container for name %q", name)
 }
 
-func lookupFromContainerEnv(p *Pod, n int) *lookup {
+func lookupFromContainerEnv(p *pod, n int) *lookup {
 	m := make(map[string]string)
 	for _, x := range p.Spec.Containers[n].Env {
 		m[x.Name] = x.Value
