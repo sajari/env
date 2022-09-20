@@ -34,7 +34,7 @@ func ParseWithExitFn(exitFn func(int)) {
 	envDumpCUE := flag.Bool("env-dump-cue", false, "dump env variables as CUE schema")
 
 	envPodYAML := flag.String("env-pod-spec", "", "path to pod YAML to read env from")
-	envPodYAMLContainerName := flag.String("env-pod-spec-container-name", "", "extra env from container `name` in the pod spec (required if nore than one container is in the pod)")
+	envPodYAMLContainerName := flag.String("env-pod-spec-container-name", "", "extract env from container `name` in the pod spec (required if more than one container is in the pod)")
 
 	flag.Parse()
 
