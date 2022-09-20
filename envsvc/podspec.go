@@ -11,13 +11,13 @@ import (
 
 type Pod struct {
 	Spec struct {
-		Conainers []struct {
+		Containers []struct {
 			Name string `yaml:"name"`
 			Env  []struct {
 				Name  string `yaml:"name"`
 				Value string `yaml:"value"`
 			} `yaml:"env"`
-		} `yaml:"conainers"`
+		} `yaml:"containers"`
 	} `yaml:"spec"`
 }
 
@@ -34,18 +34,18 @@ func PodENVLookup(r io.Reader, name string) (Getter, error) {
 		return nil, err
 	}
 
-	if len(p.Spec.Conainers) == 0 {
+	if len(p.Spec.Containers) == 0 {
 		return nil, errors.New("no containers in pod spec")
 	}
 
 	if name == "" {
-		if len(p.Spec.Conainers) != 1 {
-			return nil, fmt.Errorf("name empty but %d containers in pod spec, must set name", len(p.Spec.Conainers))
+		if len(p.Spec.Containers) != 1 {
+			return nil, fmt.Errorf("name empty but %d containers in pod spec, must set name", len(p.Spec.Containers))
 		}
 		return lookupFromContainerEnv(p, 0), nil
 	}
 
-	for i, c := range p.Spec.Conainers {
+	for i, c := range p.Spec.Containers {
 		if c.Name == name {
 			return lookupFromContainerEnv(p, i), nil
 		}
@@ -55,7 +55,7 @@ func PodENVLookup(r io.Reader, name string) (Getter, error) {
 
 func lookupFromContainerEnv(p *Pod, n int) *lookup {
 	m := make(map[string]string)
-	for _, x := range p.Spec.Conainers[n].Env {
+	for _, x := range p.Spec.Containers[n].Env {
 		m[x.Name] = x.Value
 	}
 	return &lookup{
